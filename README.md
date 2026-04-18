@@ -1,61 +1,95 @@
-# sctomatnum.github.io
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-  <title>PN Search System</title>
+  <meta charset="UTF-8">
+  <title>Search PN System</title>
   <style>
-    body { font-family: Arial; padding: 20px; }
-    input { padding: 10px; width: 300px; }
-    table { border-collapse: collapse; margin-top: 20px; }
-    th, td { border: 1px solid #ccc; padding: 8px; }
+    body {
+      font-family: Arial;
+      padding: 20px;
+      background: #f4f4f4;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      background: white;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      font-size: 14px;
+    }
+    th {
+      background: #333;
+      color: white;
+    }
   </style>
 </head>
 <body>
 
-<h2>PN Search System</h2>
+<h2>🔍 Pencarian PN / Material</h2>
 
-<input type="text" id="search" placeholder="Cari PN atau Nama..." onkeyup="searchData()">
+<input type="text" id="search" placeholder="Cari PN / Nama / Kode...">
 
-<table>
-  <thead>
-    <tr>
-      <th>PN</th>
-      <th>Nama</th>
-      <th>Model</th>
-      <th>Deskripsi</th>
-      <th>Lokasi</th>
-      <th>Stock</th>
-    </tr>
-  </thead>
-  <tbody id="tableData"></tbody>
+<table id="table">
+  <thead id="thead"></thead>
+  <tbody id="tbody"></tbody>
 </table>
 
 <script>
-const data = [
-  ["12345","Filter Oli","PC2000-8","Filter engine","A1",5],
-  ["67890","Pump Hydraulic","EX2600-7","Main pump","B2",2],
-  ["11223","Air Filter","PC2000-8","Filter udara","A2",10],
-  ["44556","Fuel Pump","EX2600-7","Pompa bahan bakar","C1",3]
-];
+let data = [];
 
-function displayData(filtered){
-  let html = "";
-  filtered.forEach(row => {
-    html += "<tr>" + row.map(d => `<td>${d}</td>`).join("") + "</tr>";
+fetch('data.json')
+  .then(res => res.json())
+  .then(json => {
+    data = json;
+    renderTable(data);
   });
-  document.getElementById("tableData").innerHTML = html;
-}
 
-function searchData(){
-  let keyword = document.getElementById("search").value.toLowerCase();
-  let filtered = data.filter(row =>
-    row[0].toLowerCase().includes(keyword) ||
-    row[1].toLowerCase().includes(keyword)
+document.getElementById("search").addEventListener("keyup", function() {
+  const keyword = this.value.toLowerCase();
+  
+  const filtered = data.filter(row => 
+    Object.values(row).some(val => 
+      String(val).toLowerCase().includes(keyword)
+    )
   );
-  displayData(filtered);
-}
 
-displayData(data);
+  renderTable(filtered);
+});
+
+function renderTable(rows) {
+  const thead = document.getElementById("thead");
+  const tbody = document.getElementById("tbody");
+
+  thead.innerHTML = "";
+  tbody.innerHTML = "";
+
+  if (rows.length === 0) return;
+
+  // Header
+  const headers = Object.keys(rows[0]);
+  let headRow = "<tr>";
+  headers.forEach(h => headRow += `<th>${h}</th>`);
+  headRow += "</tr>";
+  thead.innerHTML = headRow;
+
+  // Body
+  rows.forEach(row => {
+    let tr = "<tr>";
+    headers.forEach(h => {
+      tr += `<td>${row[h] ?? ""}</td>`;
+    });
+    tr += "</tr>";
+    tbody.innerHTML += tr;
+  });
+}
 </script>
 
 </body>
